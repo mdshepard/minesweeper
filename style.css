@@ -1,0 +1,23 @@
+board {
+  margin: none;
+}
+
+map {
+  margin: none;
+}
+
+/* main is referred to in the js as "container" */
+main {
+  background-color: transparent;
+  display:flex;
+  flex-flow: row;
+  flex-wrap: wrap;
+  margin: 0;
+}
+
+.cell {
+  margin: none;
+  height: 38px;
+  width: 38px;
+  border: 1px solid black;
+}
