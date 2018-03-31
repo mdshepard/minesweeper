@@ -15,6 +15,12 @@ main {
   margin: 0;
 }
 
+.bomb{
+  background-color: red;
+  height: 38px;
+  width: 38px;
+}
+
 .cell {
   margin: none;
   height: 38px;
