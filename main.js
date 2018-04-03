@@ -1,9 +1,12 @@
 let boardArray = [];
-let mineArray = [1];
+let mineArray = [];
+let divArray = [];
 let board = {
     difficulty: 0,
     mines: 10,
 }
+
+
 
 const difficulties = {
     easy: 8,
@@ -16,59 +19,83 @@ let difficultyButtons = document.getElementsByClassName("difficultyButton");
 function Game() {
     this.buildBoard = function() {
         this.buildBlueprintArray();
-        let number = 1;
-
-
-        for (let rowIndex = 0; rowIndex < boardArray.length; rowIndex++) {
-            // console.log('rowIndex: ', rowIndex);
-            
-            for (let columnIndex = 0; columnIndex < boardArray[rowIndex].length; columnIndex++) {
-    
-                let cell = document.createElement("div");
-                // cell.id = rowIndex + "," + columnIndex;  the following line is the new ES6 convention. $ is simply to signify that something is a variable.
-                cell.id = `row${rowIndex}-col${columnIndex}` // to access, use cell.id.split("-").split("row")[1]
-                cell.dataset.row = rowIndex;            // to access, use cell.dataset.row
-                cell.dataset.column = columnIndex;
-                cell.dataset.tileNumber = cellNumber;
-                cell.className = "cell";
-                container.appendChild(cell);
-                cellNumber = cellNumber + 1;
-            }
-        }
-        // bomb randomization
-        bombPlacement = function() {
-            bombPlaceIndex = Math.floor(Math.random() * Math.pow(board.difficulty, 2));
-            console.log(bombPlaceIndex);
-            bombsToPlace = 3;
-            while (bombsToPlace < 3) {
-                function assignBomb() {
-                    
-                }
-
-            }
-
-        }
-        //pseudocode for bomb placement
-        // bombsToPlace = 3 
-        // while(bombsToPlace)
-        // get square
-        // bomb?
+        this.buildTheDivs();
+        this.assignBombs();
         
-        bombPlacement();
     }
 
-    this.buildBlueprintArray = function() {
+    this.buildTheDivs = function() {
+        //function creating the actual html divs that represent the cells.
+        for (i = 1; i < boardArray.length; i++) {
+            let cell = document.createElement("div");
+            cell.className = "cell";
+            container.appendChild(cell);
+            cell.id = i;
+            divArray.push(cell);
+            cell.addEventListener("click", function(e) {
+                let cellClicked = e.target;
+                let cellDataItem = boardArray[cellClicked.id];
 
-        for (let rowIndex = 0; rowIndex < (board.difficulty); rowIndex++ ) {
-            let row = [];
-            // console.log("rowIndex: ",rowIndex);
-            
-            for (let columnIndex = 0; columnIndex < (board.difficulty); columnIndex++ ) {
-                row.push(columnIndex);
-                // console.log("columnIndex: ", columnIndex);
-                
+                if (cellDataItem.isBomb) {
+                    // TODO do bomb stuff. call explode function
+                    // TODO show all the bombs
+                    // TODO end the game in whatever way
+                    alert("You clicked a bomb you idiot");
+
+                } else {
+                    // If it's not a bomb
+                    // Display adjacent bombs
+                    cellDataItem.adjacentBombs = getAdjacentBombCount(cellClicked.id);
+                    cellClicked.innerHTML = cellDataItem.adjacentBombs;
+
+                    // TODO check if game is over
+
+                    let stuffLeftToClick = false;
+                    for (let i=1; i<divArray.length;i++) {
+                        if (boardArray[i].hasBeenClicked === false && boardArray[i].isBomb === false) {
+                            // Game is not over, there's unclicked shit that's not bombs.
+                            stuffLeftToClick = true;
+                        }
+                    }
+                    
+                    if (stuffLeftToClick === false) {
+                        // If there are no unclicked elements left that are not bombs, game is over
+                        // TODO end game
+                        // Display all bombs
+                        alert("God dammit you did it you fantastic bitch");
+                    }
+                    
+
+                }
+
+                cellDataItem.hasBeenClicked = true;
+            })
+        }
+    }
+    this.assignBombs = function() {
+        bombsToPlace = difficulty * 2;
+        while (bombsToPlace <= bombsToPlace && bombsToPlace > 0) {
+            bombPlaceIndex = Math.floor(Math.random() * Math.pow(board.difficulty, 2));
+            let cell = boardArray[bombPlaceIndex];
+            // Set a bomb if it's not there
+            if (cell.hasBomb === false) {
+                cell.hasBomb = true;
+                bombsToPlace--;
             }
-            boardArray.push(row);
+        } 
+    }
+
+
+    this.buildBlueprintArray = function() {
+        let numberOfCellsInGrid = Math.pow(board.difficulty, 2);
+        for (i = 0; i <= numberOfCellsInGrid; i++) {
+            let cell = {
+                index: i,
+                hasBomb: false,
+                hasBeenClicked: false,
+                adjacentBombs: 0
+            }
+            boardArray.push(cell);
         }
     }
 }
@@ -77,7 +104,6 @@ function Game() {
 for (let i = 0; i < difficultyButtons.length; i++) { 
     let difficultyButton = difficultyButtons[i];
     difficultyButton.addEventListener("click", function() {
-        
         if (container.firstChild) {
             boardArray = [];
             while (container.firstChild) {
@@ -85,12 +111,59 @@ for (let i = 0; i < difficultyButtons.length; i++) {
             }
         }
 
-        board.difficulty = difficulties[ difficultyButton.id ]; // option 3 (best way to do it. used the board object and )
-        const cellDimension = 38 + 2; // if cells already exist, you can dynamically get the width by accessing one's .style.width property
+        board.difficulty = difficulties[ difficultyButton.id ]; 
+        const cellDimension = 38 + 2; 
         container.style.height = container.style.width = (cellDimension * board.difficulty) + "px";
-        // container.style.width = (40 * board.difficulty) + "px";
         let minesweeper = new Game()
         minesweeper.buildBoard()
     }
-)
+    )
 }
+
+
+function getAdjacentBombCount(idOfSquareYouJustClicked) {
+	let bombCount = 0;
+	let currentIndex = idOfSquareYouJustClicked;
+	const adjacentSquares = getAdjacentSquares(idOfSquareYouJustClicked);
+
+	for (i = 0; i < adjacentSquares.length; i++) {
+		if (square.isBomb) {
+			bombCount += 1;
+		}
+	}
+
+	return bombCount;
+}
+
+function getAdjacentSquares(currentIndex) {
+	const adjacentSquares = [];
+
+	adjacentSquares += getLeftAndRight(currentIndex);
+
+	const topSquare = boardArray[currentIndex - board.difficulty];
+	adjacentSquares.add(topSquare);
+
+	const bottomSquare = boardArray[currentIndex + board.difficulty];
+	adjacentSquares.add(bottomSquare);
+
+	// Get diagonals
+	adjacentSquares.add(getLeftAndRight(topSquare.index));
+	adjacentSquares.add(getLeftAndRight(bottomSquare.index));
+
+	return adjacentSquares;
+}
+
+function getLeftAndRight(index) {
+	const leftAndRight = [];
+
+	const leftSquare = boardArray[index - 1];
+	leftAndRight.add(leftSquare);
+
+	const rightSquare = boardArray[index + 1];
+	leftAndRight.add(rightSquare);
+
+	return leftAndRight;
+}
+
+
+
